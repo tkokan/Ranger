@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="Ranger">
+  <DataContextMoniker Name="/RangerDataContext" />
+  <nestedChildShapes>
+    <classShape Id="88616c58-e15e-42ab-a098-4c07b7d86825" absoluteBounds="3.5, 1, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/RangerDataContext/CardinalDirectionPoint" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f15d1565-06bf-4816-9bf6-7a13890231c2" absoluteBounds="3.515, 1.46, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="7949af46-19a0-4255-b66b-c520210c371f" absoluteBounds="3.5, 3.625, 2, 1.9631982421875005">
+      <DataClassMoniker Name="/RangerDataContext/GridNode" />
+      <nestedChildShapes>
+        <elementListCompartment Id="64edca46-95bc-4387-b279-4f7838b32312" absoluteBounds="3.515, 4.085, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9d90841e-a588-494f-9ea8-e281df59b844" absoluteBounds="0.75, 2.5, 2, 1.5785953776041666">
+      <DataClassMoniker Name="/RangerDataContext/Origin" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8101c7a7-149c-4104-afaa-7ae40bcb7305" absoluteBounds="0.765, 2.96, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.75 : 2.5); (1.75 : 1.7499995); (3.5 : 1.7499995)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/RangerDataContext/Origin/Origin_CardinalDirectionPoint" />
+      <nodes>
+        <classShapeMoniker Id="9d90841e-a588-494f-9ea8-e281df59b844" />
+        <classShapeMoniker Id="88616c58-e15e-42ab-a098-4c07b7d86825" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 3.85179768880208); (3.5 : 3.85179768880208)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/RangerDataContext/Origin/Origin_GridNode" />
+      <nodes>
+        <classShapeMoniker Id="9d90841e-a588-494f-9ea8-e281df59b844" />
+        <classShapeMoniker Id="7949af46-19a0-4255-b66b-c520210c371f" />
+      </nodes>
+    </associationConnector>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

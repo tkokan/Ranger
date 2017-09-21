@@ -1,8 +1,10 @@
-﻿namespace Ranger
+﻿using System;
+
+namespace Ranger
 {
     class Program
     {
-        private const string originName = "London, UK";
+        private const string originName = "Istanbul, Turkey";
         private const int rangeMins = 180;
         private const int gridSize = 35;
         private const int smoothPct = 60;
@@ -18,6 +20,9 @@
             range.CreateBorder();
 
             range.CreateDynamicMap(smoothPct);
+
+            Console.WriteLine("Done");
+            Console.ReadLine();
         }
     }
 }

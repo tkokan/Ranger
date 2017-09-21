@@ -19,13 +19,11 @@ namespace Ranger
         private readonly DistanceMatrixApi distanceApi;
         private readonly RangerDataContext dbContext;
 
+        private readonly Dictionary<bool, HashSet<LatticePoint>> queriedPoints;
+        private readonly List<LatticePoint> borderPoints;
+
         private double deltaLat;
         private double deltaLon;
-
-        private HashSet<LatticePoint> insidePoints;
-        private HashSet<LatticePoint> outsidePoints;
-
-        List<LatticePoint> borderPoints;
 
         /// <summary>
         /// Ctor
@@ -45,13 +43,24 @@ namespace Ranger
             this.rangeMins = rangeMins;
             this.gridSize = gridSize;
 
+            queriedPoints = new Dictionary<bool, HashSet<LatticePoint>>()
+            {
+                //inside points
+                [true] = new HashSet<LatticePoint>(),
+
+                // outside points
+                [false] = new HashSet<LatticePoint>()
+            };
+
+            borderPoints = new List<LatticePoint>();
+
             // make sure an exception is thrown if we accidentaly use deltas before setting them
             deltaLat = double.NaN;
             deltaLon = double.NaN;
 
             var apiKeyPath = Path.Combine(Properties.Settings.Default.RangerFolder, "apiKey.txt");
             distanceApi = new DistanceMatrixApi(apiKeyPath);
-            
+
             dbContext = new RangerDataContext(connectionString);
         }
 
@@ -107,7 +116,7 @@ namespace Ranger
             LoadGridNodes();
 
             // make sure we have two nodes to start with
-            if (insidePoints.Count == 0 && outsidePoints.Count == 0)
+            if (queriedPoints.Any(x => x.Value.Count == 0))
             {
                 FirstTwoNodes();
             }
@@ -116,7 +125,7 @@ namespace Ranger
             var pushed = new HashSet<LatticePoint>();
 
             // initialize the stack
-            FindUnprocessedBorder(insidePoints, outsidePoints, stack, pushed);
+            FindUnprocessedBorder(stack, pushed);
 
             // process the stack
             while (stack.Count > 0)
@@ -125,7 +134,7 @@ namespace Ranger
                 Debug.WriteLine($"\tProcessing: {currPoint}");
 
                 // already processed?
-                if (insidePoints.Contains(currPoint) || outsidePoints.Contains(currPoint))
+                if (queriedPoints.Any(x => x.Value.Contains(currPoint)))
                 {
                     continue;
                 }
@@ -134,8 +143,6 @@ namespace Ranger
 
                 // save this point
                 AddNode(currPoint.X, currPoint.Y, inside);
-
-                var otherSet = inside ? outsidePoints : insidePoints;
 
                 // possibly add some of this point's neigbors to the stack
                 foreach (var firstNei in Neighbors(currPoint))
@@ -147,7 +154,7 @@ namespace Ranger
 
                     foreach (var secondNei in Neighbors(firstNei))
                     {
-                        if (otherSet.Contains(secondNei) && !pushed.Contains(firstNei))
+                        if (queriedPoints[!inside].Contains(secondNei) && !pushed.Contains(firstNei))
                         {
                             stack.Push(firstNei);
                             pushed.Add(firstNei);
@@ -165,11 +172,7 @@ namespace Ranger
         public void CreateBorder()
         {
             var startingCenter = GetStartingBorderPoint();
-
             var direction = DirectionEnum.West;
-
-            borderPoints = new List<LatticePoint>();
-
             var currCenter = startingCenter;
 
             do
@@ -236,7 +239,7 @@ namespace Ranger
             var forwardLeft = oneForward.Move(direction.Rotate(1));
 
             // decide where to go next
-            if (!insidePoints.Contains(forwardLeft))
+            if (!queriedPoints[true].Contains(forwardLeft))
             {
                 direction = direction.Rotate(1);
             }
@@ -245,7 +248,7 @@ namespace Ranger
                 var directionRight = direction.Rotate(-1);
                 var forwardRight = oneForward.Move(directionRight);
 
-                if (insidePoints.Contains(forwardRight))
+                if (queriedPoints[true].Contains(forwardRight))
                 {
                     direction = directionRight;
                 }
@@ -254,22 +257,22 @@ namespace Ranger
 
         private LatticePoint GetStartingBorderPoint()
         {
-            foreach (var insidePoint in insidePoints)
+            foreach (var insidePoint in queriedPoints[true])
             {
                 // east
-                if (!insidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2)))
+                if (!queriedPoints[true].Contains(insidePoint.Move(DirectionEnum.East, 2)))
                 {
                     continue;
                 }
 
                 // north
-                if (!outsidePoints.Contains(insidePoint.Move(DirectionEnum.North, 2)))
+                if (!queriedPoints[false].Contains(insidePoint.Move(DirectionEnum.North, 2)))
                 {
                     continue;
                 }
 
                 // north-east
-                if (!outsidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2).Move(DirectionEnum.North, 2)))
+                if (!queriedPoints[false].Contains(insidePoint.Move(DirectionEnum.East, 2).Move(DirectionEnum.North, 2)))
                 {
                     continue;
                 }
@@ -288,7 +291,7 @@ namespace Ranger
             // doing this in two parts because DirectionEnum is not in the DB
             var northernPoint = dbContext
                 .CardinalDirectionPoints
-                .Where(x => x.OriginId == Home.Id)
+                .Where(x => x.OriginId == Home.Id && x.RangeMins == rangeMins)
                 .ToList()
                 .Single(x => x.Direction == DirectionEnum.North);
 
@@ -327,12 +330,20 @@ namespace Ranger
         /// <summary>
         /// Finds all unprocessed points that have an inside neighbor and an outside neighbor
         /// </summary>
-        private void FindUnprocessedBorder(HashSet<LatticePoint> smallerSet, HashSet<LatticePoint> biggerSet, Stack<LatticePoint> stack, HashSet<LatticePoint> pushedOnStack)
+        private void FindUnprocessedBorder(Stack<LatticePoint> stack, HashSet<LatticePoint> pushedOnStack)
         {
-            if (smallerSet.Count > biggerSet.Count)
+            HashSet<LatticePoint> smallerSet;
+            HashSet<LatticePoint> biggerSet;
+
+            if (queriedPoints[true].Count > queriedPoints[false].Count)
             {
-                FindUnprocessedBorder(biggerSet, smallerSet, stack, pushedOnStack);
-                return;
+                smallerSet = queriedPoints[false];
+                biggerSet = queriedPoints[true];
+            }
+            else
+            {
+                smallerSet = queriedPoints[true];
+                biggerSet = queriedPoints[false];
             }
 
             foreach (var gridNode in smallerSet)
@@ -407,7 +418,7 @@ namespace Ranger
             };
 
             // add to corresponding hash set
-            (inside ? insidePoints : outsidePoints).Add(new LatticePoint(gridNode));
+            queriedPoints[inside].Add(new LatticePoint(gridNode));
 
             // save
             dbContext.GridNodes.InsertOnSubmit(gridNode);
@@ -421,14 +432,10 @@ namespace Ranger
 
         private void LoadGridNodes()
         {
-            insidePoints = new HashSet<LatticePoint>();
-            outsidePoints = new HashSet<LatticePoint>();
-
-            // ToDo: Make sure this will have newly added nodes, or find a way to refresh.
-            foreach (var gridNode in Home.GridNodes)
+            foreach (var gridNode in Home.GridNodes.Where(x => x.RangeMins == rangeMins))
             {
                 // add to the corresponding hash set
-                (gridNode.Inside ? insidePoints : outsidePoints).Add(new LatticePoint(gridNode));
+                queriedPoints[gridNode.Inside].Add(new LatticePoint(gridNode));
             }
         }
 

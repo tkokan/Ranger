@@ -52,10 +52,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapAreaInputs.cs" />
+    <Compile Include="MapInputs.cs" />
+    <Compile Include="Ranger.cs" />
     <Compile Include="CardinalDirectionPoint.cs" />
     <Compile Include="DirectionEnum.cs" />
     <Compile Include="DirectionGeoLine.cs" />
     <Compile Include="DistanceMatrixApi.cs" />
+    <Compile Include="ComputeAreaInputs.cs" />
     <Compile Include="Element.cs" />
     <Compile Include="Geo.cs" />
     <Compile Include="GeoLocation.cs" />
@@ -105,6 +109,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DynamicMapTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PolygonTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

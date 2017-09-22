@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using static Ranger.Properties.Settings;
 
 namespace Ranger
 {
@@ -20,7 +21,6 @@ namespace Ranger
         private readonly RangerDataContext dbContext;
 
         private readonly Dictionary<bool, HashSet<LatticePoint>> queriedPoints;
-        private readonly List<LatticePoint> borderPoints;
 
         private double deltaLat;
         private double deltaLon;
@@ -30,7 +30,7 @@ namespace Ranger
         /// </summary>
         public RangeGrid(string originName, int rangeMins, int gridSize)
         {
-            var connectionStringPath = Path.Combine(Properties.Settings.Default.RangerFolder, "connectionString.txt");
+            var connectionStringPath = Path.Combine(Default.RangerFolder, "connectionString.txt");
             var connectionString = File.ReadAllText(connectionStringPath);
 
             Home = Origin.Load(connectionString, originName);
@@ -52,13 +52,11 @@ namespace Ranger
                 [false] = new HashSet<LatticePoint>()
             };
 
-            borderPoints = new List<LatticePoint>();
-
             // make sure an exception is thrown if we accidentaly use deltas before setting them
             deltaLat = double.NaN;
             deltaLon = double.NaN;
 
-            var apiKeyPath = Path.Combine(Properties.Settings.Default.RangerFolder, "apiKey.txt");
+            var apiKeyPath = Path.Combine(Default.RangerFolder, "apiKey.txt");
             distanceApi = new DistanceMatrixApi(apiKeyPath);
 
             dbContext = new RangerDataContext(connectionString);
@@ -67,7 +65,7 @@ namespace Ranger
         /// <summary>
         /// Initializes the grid by loading or creating cardinal direction points.
         /// </summary>
-        public void Init()
+        private void Init()
         {
             var directionPoints = new Dictionary<DirectionEnum, IGeoLocation>();
 
@@ -113,6 +111,7 @@ namespace Ranger
         /// </summary>
         public void Process()
         {
+            Init();
             LoadGridNodes();
 
             // make sure we have two nodes to start with
@@ -169,8 +168,9 @@ namespace Ranger
         /// <summary>
         /// Creates border that goes between inside points and outside points.
         /// </summary>
-        public void CreateBorder()
+        public GeoLocation[] GetBorder(int smoothPct = 0)
         {
+            var borderPoints = new List<LatticePoint>();
             var startingCenter = GetStartingBorderPoint();
             var direction = DirectionEnum.West;
             var currCenter = startingCenter;
@@ -180,13 +180,7 @@ namespace Ranger
                 borderPoints.Add(currCenter);
                 MoveOnBorder(ref currCenter, ref direction);
             } while (currCenter != startingCenter);
-        }
 
-        /// <summary>
-        /// Creats a dynamic Google map.
-        /// </summary>
-        public void CreateDynamicMap(int smoothPct = 0)
-        {
             // convert lattice points to geo locations
             var nodes = borderPoints.Select(p => GeoPointFromLatticePoint(p)).ToArray();
 
@@ -202,57 +196,15 @@ namespace Ranger
 
                 smoothed[i] = new GeoLocation()
                 {
-                    Latitude = Smoothed(nodes[prev].Latitude, nodes[i].Latitude, nodes[next].Latitude, smoothPct),
-                    Longitude = Smoothed(nodes[prev].Longitude, nodes[i].Longitude, nodes[next].Longitude, smoothPct)
+                    Latitude = Smooth(nodes[prev].Latitude, nodes[i].Latitude, nodes[next].Latitude, smoothPct),
+                    Longitude = Smooth(nodes[prev].Longitude, nodes[i].Longitude, nodes[next].Longitude, smoothPct)
                 };
             }
 
-            var apiKeyPath = Path.Combine(Properties.Settings.Default.RangerFolder, "apiKey.txt");
-            var geometryApi = new GeometryApi(apiKeyPath);
-
-            // build a filename with origin name, range, grid size and smooth percentage
-            var fileName = string.Format(
-                "{0}-Rng{1}-Grd{2}-Pct{3}.html",
-                Home.Name.Replace(" ", ""),
-                rangeMins.ToString("000"),
-                gridSize.ToString("000"),
-                smoothPct.ToString("000"));
-
-            var filePath = Path.Combine(Properties.Settings.Default.RangerFolder, "Maps", fileName);
-
-            // generate map
-            geometryApi.GenerateDynamicMap(smoothed, Home, filePath);
+            return smoothed;
         }
 
-        public double CalculateArea(int smoothPct = 0)
-        {
-            // convert lattice points to geo locations
-            var nodes = borderPoints.Select(p => GeoPointFromLatticePoint(p)).ToArray();
-
-            var n = nodes.Length;
-
-            var smoothed = new GeoLocation[n];
-
-            // apply smoothing
-            for (var i = 0; i < n; i++)
-            {
-                var next = (i + 1) % n;
-                var prev = (i - 1 + n) % n;
-
-                smoothed[i] = new GeoLocation()
-                {
-                    Latitude = Smoothed(nodes[prev].Latitude, nodes[i].Latitude, nodes[next].Latitude, smoothPct),
-                    Longitude = Smoothed(nodes[prev].Longitude, nodes[i].Longitude, nodes[next].Longitude, smoothPct)
-                };
-            }
-
-            var apiKeyPath = Path.Combine(Properties.Settings.Default.RangerFolder, "apiKey.txt");
-            var geometryApi = new GeometryApi(apiKeyPath);
-
-            return geometryApi.ComputeArea(nodes, Properties.Settings.Default.RangerFolder);
-        }
-
-        private static double Smoothed(double a, double b, double c, int smoothPct)
+        private static double Smooth(double a, double b, double c, int smoothPct)
         {
             var smooth = smoothPct / 100.0;
             return b * (1.0 - smooth) + smooth * (a + c) / 2.0;
@@ -475,7 +427,7 @@ namespace Ranger
             var geoLine = new DirectionGeoLine(Home, direction);
 
             var low = 0.0;
-            var high = Properties.Settings.Default.StartingDelta;
+            var high = Default.StartingDelta;
 
             while (Inside(geoLine, high))
             {
@@ -483,7 +435,7 @@ namespace Ranger
                 high *= 2;
             }
 
-            var maxAerialDistance = Properties.Settings.Default.AerialDistanceLimit;
+            var maxAerialDistance = Default.AerialDistanceLimit;
 
             var curr = double.NaN;
             double aerialDistance;

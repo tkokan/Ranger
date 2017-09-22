@@ -13,34 +13,17 @@
 
         function initialize() {
             var map = new google.maps.Map(document.getElementById('map-canvas'), {
-                zoom: 7,
+                zoom: /*zoom*/,
                 center: new google.maps.LatLng(/*center*/),
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
 
-            var areaPath = [
-/*nodes*/
-            ];
-
-            var color = "#000000";
-            var strokeOpacity = 0.7;
-            var strokeWeight = 2;
-            var fillOpacity = 0.1;
-
-            var polygon = new google.maps.Polygon({
-                path: areaPath,
-                strokeColor: color,
-                strokeOpacity: strokeOpacity,
-                strokeWeight: strokeWeight,
-                fillColor: color,
-                fillOpacity: fillOpacity,
-                map: map
-            });
+            /*polygons*/
         }
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 </head>
 <body>
-    <div id="map-canvas" style="width: 1900px; height: 900px"></div>
+    <div id="map-canvas" style="width: /*width*/px; height: /*height*/px; margin-right:auto; margin-left:auto;"></div>
 </body>
 </html>

@@ -11,5 +11,35 @@
     <Setting Name="RangerFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)">C:\Ranger</Value>
     </Setting>
+    <Setting Name="RangeMinsDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">180</Value>
+    </Setting>
+    <Setting Name="GridSizeDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">35</Value>
+    </Setting>
+    <Setting Name="SmoothPctDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">60</Value>
+    </Setting>
+    <Setting Name="ColorDefault" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">#000000</Value>
+    </Setting>
+    <Setting Name="StrokeOpacityDefault" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">0.7</Value>
+    </Setting>
+    <Setting Name="StrokeWeightDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="FillOpacityDefault" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">0.1</Value>
+    </Setting>
+    <Setting Name="MapWidthDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1800</Value>
+    </Setting>
+    <Setting Name="MapHeightDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">900</Value>
+    </Setting>
+    <Setting Name="MapZoomDefault" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

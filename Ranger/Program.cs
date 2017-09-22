@@ -1,27 +1,65 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Ranger
 {
     class Program
     {
-        private const string originName = "Istanbul, Turkey";
-        private const int rangeMins = 180;
-        private const int gridSize = 35;
-        private const int smoothPct = 60;
-
         static void Main(string[] args)
         {
-            var range = new RangeGrid(originName, rangeMins, gridSize);
+            var ranger = new Ranger();
 
-            range.Init();
+            var fillOpacity = 0.4;
 
-            range.Process();
+            var mapAreaInputs = new List<MapAreaInputs>()
+            {
+                new MapAreaInputs()
+                {
+                    OriginName = "London, UK",
+                    Color = "#872D7D",
+                    FillOpacity = fillOpacity
+                },
 
-            range.CreateBorder();
+                new MapAreaInputs()
+                {
+                    OriginName = "Paris, France",
+                    Color = "#FF8F00",
+                    FillOpacity = fillOpacity
+                },
 
-            //range.CreateDynamicMap(smoothPct);
+                new MapAreaInputs()
+                {
+                    OriginName = "Rome, Italy",
+                    Color = "#C22326",
+                    FillOpacity = fillOpacity
+                },
 
-            var area = range.CalculateArea(smoothPct);
+                new MapAreaInputs()
+                {
+                    OriginName = "Berlin, Germany",
+                    Color = "#3C7DC4",
+                    FillOpacity = fillOpacity
+                },
+
+                new MapAreaInputs()
+                {
+                    OriginName = "Madrid, Spain",
+                    Color = "#5A8F29",
+                    FillOpacity = fillOpacity
+                }
+            };
+
+            var mapInputs = new MapInputs()
+            {
+                Zoom = 5,
+                Width = 800,
+                Height = 700
+            };
+
+            ranger.CreateDynamicMap(mapAreaInputs, mapInputs, "FiveCities.html");
+
+            var area = ranger.CalculateArea(mapAreaInputs.First());
 
             Console.WriteLine("Area = {0:0.00} sq km", area);
 

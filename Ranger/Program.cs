@@ -19,7 +19,11 @@ namespace Ranger
 
             range.CreateBorder();
 
-            range.CreateDynamicMap(smoothPct);
+            //range.CreateDynamicMap(smoothPct);
+
+            var area = range.CalculateArea(smoothPct);
+
+            Console.WriteLine("Area = {0:0.00} sq km", area);
 
             Console.WriteLine("Done");
             Console.ReadLine();

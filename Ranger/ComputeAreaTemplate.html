@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=/*key*/"></script>
+    <script type="text/javascript">
+
+        function initialize() {
+            var areaPath = [
+/*nodes*/
+            ];
+
+            var Area = google.maps.geometry.spherical.computeArea(areaPath);
+            document.getElementById('area').innerHTML = Area;
+        }
+
+    </script>
+</head>
+<body onload="initialize()">
+    <div id="area"></div>
+</body>
+</html>

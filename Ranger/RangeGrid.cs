@@ -224,6 +224,34 @@ namespace Ranger
             geometryApi.GenerateDynamicMap(smoothed, Home, filePath);
         }
 
+        public double CalculateArea(int smoothPct = 0)
+        {
+            // convert lattice points to geo locations
+            var nodes = borderPoints.Select(p => GeoPointFromLatticePoint(p)).ToArray();
+
+            var n = nodes.Length;
+
+            var smoothed = new GeoLocation[n];
+
+            // apply smoothing
+            for (var i = 0; i < n; i++)
+            {
+                var next = (i + 1) % n;
+                var prev = (i - 1 + n) % n;
+
+                smoothed[i] = new GeoLocation()
+                {
+                    Latitude = Smoothed(nodes[prev].Latitude, nodes[i].Latitude, nodes[next].Latitude, smoothPct),
+                    Longitude = Smoothed(nodes[prev].Longitude, nodes[i].Longitude, nodes[next].Longitude, smoothPct)
+                };
+            }
+
+            var apiKeyPath = Path.Combine(Properties.Settings.Default.RangerFolder, "apiKey.txt");
+            var geometryApi = new GeometryApi(apiKeyPath);
+
+            return geometryApi.ComputeArea(nodes, Properties.Settings.Default.RangerFolder);
+        }
+
         private static double Smoothed(double a, double b, double c, int smoothPct)
         {
             var smooth = smoothPct / 100.0;

@@ -2,36 +2,36 @@
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="Ranger">
   <DataContextMoniker Name="/RangerDataContext" />
   <nestedChildShapes>
-    <classShape Id="88616c58-e15e-42ab-a098-4c07b7d86825" absoluteBounds="3.5, 1, 2, 1.7708968098958331">
-      <DataClassMoniker Name="/RangerDataContext/CardinalDirectionPoint" />
-      <nestedChildShapes>
-        <elementListCompartment Id="f15d1565-06bf-4816-9bf6-7a13890231c2" absoluteBounds="3.515, 1.46, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
-      </nestedChildShapes>
-    </classShape>
-    <classShape Id="7949af46-19a0-4255-b66b-c520210c371f" absoluteBounds="3.5, 3.625, 2, 1.9631982421875005">
-      <DataClassMoniker Name="/RangerDataContext/GridNode" />
-      <nestedChildShapes>
-        <elementListCompartment Id="64edca46-95bc-4387-b279-4f7838b32312" absoluteBounds="3.515, 4.085, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
-      </nestedChildShapes>
-    </classShape>
-    <classShape Id="9d90841e-a588-494f-9ea8-e281df59b844" absoluteBounds="0.75, 2.5, 2, 1.5785953776041666">
+    <classShape Id="31b0e9c1-67a5-483c-87ce-5586f6069425" absoluteBounds="0.75, 2.5, 2, 1.5785953776041666">
       <DataClassMoniker Name="/RangerDataContext/Origin" />
       <nestedChildShapes>
-        <elementListCompartment Id="8101c7a7-149c-4104-afaa-7ae40bcb7305" absoluteBounds="0.765, 2.96, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="944678f7-dcee-43a1-95d2-a02506348b69" absoluteBounds="0.765, 2.96, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(1.75 : 2.5); (1.75 : 1.7499995); (3.5 : 1.7499995)]" fixedFrom="Algorithm" fixedTo="Algorithm">
-      <AssociationMoniker Name="/RangerDataContext/Origin/Origin_CardinalDirectionPoint" />
-      <nodes>
-        <classShapeMoniker Id="9d90841e-a588-494f-9ea8-e281df59b844" />
-        <classShapeMoniker Id="88616c58-e15e-42ab-a098-4c07b7d86825" />
-      </nodes>
-    </associationConnector>
+    <classShape Id="518fb168-a766-4939-b06a-69905fef94a2" absoluteBounds="3.5, 3.625, 2, 1.9631982421875005">
+      <DataClassMoniker Name="/RangerDataContext/GridNode" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1b4637fa-1c39-43c7-8ba6-da9574cba391" absoluteBounds="3.515, 4.085, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="d27a6796-a6f8-4d0d-a69b-eb01279f7481" absoluteBounds="3.5, 1, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/RangerDataContext/CardinalDirectionPoint" />
+      <nestedChildShapes>
+        <elementListCompartment Id="814c4075-0acd-4141-9b98-81d6103c3f49" absoluteBounds="3.515, 1.46, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
     <associationConnector edgePoints="[(2.75 : 3.85179768880208); (3.5 : 3.85179768880208)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/RangerDataContext/Origin/Origin_GridNode" />
       <nodes>
-        <classShapeMoniker Id="9d90841e-a588-494f-9ea8-e281df59b844" />
-        <classShapeMoniker Id="7949af46-19a0-4255-b66b-c520210c371f" />
+        <classShapeMoniker Id="31b0e9c1-67a5-483c-87ce-5586f6069425" />
+        <classShapeMoniker Id="518fb168-a766-4939-b06a-69905fef94a2" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(1.75 : 2.5); (1.75 : 1.7499995); (3.5 : 1.7499995)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/RangerDataContext/Origin/Origin_CardinalDirectionPoint" />
+      <nodes>
+        <classShapeMoniker Id="31b0e9c1-67a5-483c-87ce-5586f6069425" />
+        <classShapeMoniker Id="d27a6796-a6f8-4d0d-a69b-eb01279f7481" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>

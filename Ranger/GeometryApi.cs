@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.PhantomJS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,8 +19,8 @@ namespace Ranger
             // create folder if it doesn't exist
             new FileInfo(filePath).Directory.Create();
 
-            var mapTemplate = File.ReadAllText("DynamicMapTemplate.html");
-            var polygonTemplate = File.ReadAllText("PolygonTemplate.html");
+            var mapTemplate = File.ReadAllText(Path.Combine("HtmlTemplates", "DynamicMapTemplate.html"));
+            var polygonTemplate = File.ReadAllText(Path.Combine("HtmlTemplates", "PolygonTemplate.html"));
 
             var html = new StringBuilder(mapTemplate);
 
@@ -60,9 +58,9 @@ namespace Ranger
         /// <summary>
         /// Compute the area (in square km) of the region with a border determined by nodes.
         /// </summary>
-        public static double ComputeArea(IEnumerable<IGeoLocation> nodes, string apiKey, string driverFolderPath)
+        public static double ComputeArea(IEnumerable<IGeoLocation> nodes, string apiKey)
         {
-            var template = File.ReadAllText("ComputeAreaTemplate.html");
+            var template = File.ReadAllText(Path.Combine("HtmlTemplates", "ComputeAreaTemplate.html"));
             var html = new StringBuilder(template);
 
             html.Replace("/*key*/", apiKey);
@@ -71,23 +69,29 @@ namespace Ranger
 
             html.Replace("/*nodes*/", string.Join($",{Environment.NewLine}", nodesStrings));
 
-            var path = Path.Combine(driverFolderPath, "ComputeArea.html");
-
-            File.WriteAllText(path, html.ToString());
-
-            var driver = new PhantomJSDriver(driverFolderPath);
-            var filePath = Path.Combine("file:///", path);
-            var url = new Uri(path);
-
-            driver.Navigate().GoToUrl(url);
-
-            var element = driver.FindElement(By.Id("area"));
-            var area = double.Parse(element.Text);
-
-            driver.Quit();
-            File.Delete(path);
-
+            var area = JavaScriptHelper.ExecuteAndRead(html.ToString(), "area");
+            
             return area / 1E6;
+        }
+
+        public static IGeoLocation ComputeOffset(IGeoLocation start, int distance, double heading, string apiKey)
+        {
+            var template = File.ReadAllText(Path.Combine("HtmlTemplates", "ComputeOffsetTemplate.html"));
+            var html = new StringBuilder(template);
+
+            html.Replace("/*key*/", apiKey);
+            html.Replace("/*startLat*/", start.Latitude.ToString());
+            html.Replace("/*startLon*/", start.Longitude.ToString());
+            html.Replace("/*distance*/", distance.ToString());
+            html.Replace("/*heading*/", heading.ToString());
+
+            var coordinates = JavaScriptHelper.ExecuteAndRead(html.ToString(), new string[] { "latitude", "longitude" });
+
+            return new GeoLocation()
+            {
+                Latitude = coordinates["latitude"],
+                Longitude = coordinates["longitude"]
+            };
         }
 
         private static IEnumerable<string> GetNodesStrings(IEnumerable<IGeoLocation> nodes, int indentation = 0)

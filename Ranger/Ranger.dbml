@@ -1,33 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Ranger" Class="RangerDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Table Name="dbo.CardinalDirectionPoints" Member="CardinalDirectionPoints">
-    <Type Name="CardinalDirectionPoint">
-      <Column Name="OriginId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="RangeMins" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Direction" Member="direction" AccessModifier="Private" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Latitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="Longitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Association Name="Origin_CardinalDirectionPoint" Member="Origin" ThisKey="OriginId" OtherKey="Id" Type="Origin" IsForeignKey="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.GridNodes" Member="GridNodes">
-    <Type Name="GridNode">
-      <Column Name="OriginId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="RangeMins" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="GridSize" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="X" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Y" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Inside" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Association Name="Origin_GridNode" Member="Origin" ThisKey="OriginId" OtherKey="Id" Type="Origin" IsForeignKey="true" />
-    </Type>
-  </Table>
+  <Connection Mode="AppSettings" ConnectionString="Data Source=TK-PC;Initial Catalog=Ranger;Integrated Security=True" SettingsObjectName="Ranger.Properties.Settings" SettingsPropertyName="RangerConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Origins" Member="Origins">
     <Type Name="Origin">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="Latitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Longitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Name" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
-      <Association Name="Origin_CardinalDirectionPoint" Member="CardinalDirectionPoints" ThisKey="Id" OtherKey="OriginId" Type="CardinalDirectionPoint" />
       <Association Name="Origin_GridNode" Member="GridNodes" ThisKey="Id" OtherKey="OriginId" Type="GridNode" />
+      <Association Name="Origin_CardinalDirectionPoint" Member="CardinalDirectionPoints" ThisKey="Id" OtherKey="OriginId" Type="CardinalDirectionPoint" />
+    </Type>
+  </Table>
+  <Table Name="dbo.GridNodes" Member="GridNodes">
+    <Type Name="GridNode">
+      <Column Name="OriginId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="RangeMins" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="UnitDistance" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="X" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Y" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Inside" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="Origin_GridNode" Member="Origin" ThisKey="OriginId" OtherKey="Id" Type="Origin" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CardinalDirectionPoints" Member="CardinalDirectionPoints">
+    <Type Name="CardinalDirectionPoint">
+      <Column Name="OriginId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="UnitDistance" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Direction" Member="direction" AccessModifier="Private" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Latitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Longitude" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Association Name="Origin_CardinalDirectionPoint" Member="Origin" ThisKey="OriginId" OtherKey="Id" Type="Origin" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>

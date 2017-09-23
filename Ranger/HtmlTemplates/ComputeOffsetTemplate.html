@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=/*key*/"></script>
+    <script type="text/javascript">
+
+        function initialize() {
+
+            var start = new google.maps.LatLng(/*startLat*/, /*startLon*/);
+            var distance = /*distance*/;
+            var heading = /*heading*/;
+            var endPoint = google.maps.geometry.spherical.computeOffset(start, distance, heading);
+
+            document.getElementById('latitude').innerHTML = endPoint.lat();
+            document.getElementById('longitude').innerHTML = endPoint.lng();
+        }
+
+    </script>
+</head>
+<body onload="initialize()">
+    <div id="latitude"></div>
+    <div id="longitude"></div>
+</body>
+</html>

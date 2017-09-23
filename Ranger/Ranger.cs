@@ -22,10 +22,10 @@ namespace Ranger
         {
             // build a filename with origin name, range, grid size and smooth percentage
             var fileName = string.Format(
-                "{0}-Rng{1}-Grd{2}-Pct{3}.html",
+                "{0}-Rng{1}-Unt{2}-Pct{3}.html",
                 mapAreaInput.OriginName.Replace(" ", ""),
                 mapAreaInput.RangeMins.ToString("000"),
-                mapAreaInput.GridSize.ToString("000"),
+                mapAreaInput.UnitDistance,
                 mapAreaInput.SmoothPct.ToString("000"));
 
             CreateDynamicMap(new List<MapAreaInputs>() { mapAreaInput }, mapInputs, fileName);
@@ -33,11 +33,11 @@ namespace Ranger
 
         public double CalculateArea(ComputeAreaInputs rangeOptions)
         {
-            var range = new RangeGrid(rangeOptions.OriginName, rangeOptions.RangeMins, rangeOptions.GridSize);
+            var range = new RangeGrid(rangeOptions.OriginName, rangeOptions.RangeMins, rangeOptions.UnitDistance);
             range.Process();
             var border = range.GetBorder(rangeOptions.SmoothPct);
 
-            return GeometryApi.ComputeArea(border, apiKey, Default.RangerFolder);
+            return GeometryApi.ComputeArea(border, apiKey);
         }
 
         public void CreateDynamicMap(IEnumerable<MapAreaInputs> mapAreaInputs, MapInputs mapInputs, string fileName)
@@ -51,7 +51,7 @@ namespace Ranger
 
             foreach (var mapAreaInput in mapAreaInputs)
             {
-                var range = new RangeGrid(mapAreaInput.OriginName, mapAreaInput.RangeMins, mapAreaInput.GridSize);
+                var range = new RangeGrid(mapAreaInput.OriginName, mapAreaInput.RangeMins, mapAreaInput.UnitDistance);
                 range.Process();
 
                 // set border

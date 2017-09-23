@@ -62,5 +62,10 @@
                     return 0;
             }
         }
+
+        public static int Heading(this DirectionEnum direction)
+        {
+            return (360 - (int)direction * 90) % 360;
+        }
     }
 }

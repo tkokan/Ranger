@@ -6,7 +6,7 @@ namespace Ranger
     {
         public string OriginName { get; set; }
         public int RangeMins { get; set; }
-        public int GridSize { get; set; }
+        public int UnitDistance { get; set; }
         public int SmoothPct { get; set; }
         public GeoLocation[] Border { get; set; }
 
@@ -14,7 +14,7 @@ namespace Ranger
         {
             OriginName = string.Empty;
             RangeMins = Default.RangeMinsDefault;
-            GridSize = Default.GridSizeDefault;
+            UnitDistance = Default.UnitDistanceDefault;
             SmoothPct = Default.SmoothPctDefault;
         }
     }

@@ -25,15 +25,6 @@ namespace Ranger.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("500")]
-        public double AerialDistanceLimit {
-            get {
-                return ((double)(this["AerialDistanceLimit"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
         public double StartingDelta {
             get {
@@ -61,10 +52,10 @@ namespace Ranger.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("35")]
-        public int GridSizeDefault {
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public int UnitDistanceDefault {
             get {
-                return ((int)(this["GridSizeDefault"]));
+                return ((int)(this["UnitDistanceDefault"]));
             }
         }
         
@@ -137,6 +128,16 @@ namespace Ranger.Properties {
         public int MapZoomDefault {
             get {
                 return ((int)(this["MapZoomDefault"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=TK-PC;Initial Catalog=Ranger;Integrated Security=True")]
+        public string RangerConnectionString {
+            get {
+                return ((string)(this["RangerConnectionString"]));
             }
         }
     }

@@ -14,8 +14,8 @@ namespace Ranger
     {
         public Origin Home { get; }
 
-        private readonly int gridSize;
         private readonly int rangeMins;
+        private readonly int unitDistance;
 
         private readonly DistanceMatrixApi distanceApi;
         private readonly RangerDataContext dbContext;
@@ -28,7 +28,7 @@ namespace Ranger
         /// <summary>
         /// Ctor
         /// </summary>
-        public RangeGrid(string originName, int rangeMins, int gridSize)
+        public RangeGrid(string originName, int rangeMins, int unitDistance)
         {
             var connectionStringPath = Path.Combine(Default.RangerFolder, "connectionString.txt");
             var connectionString = File.ReadAllText(connectionStringPath);
@@ -41,7 +41,7 @@ namespace Ranger
             }
 
             this.rangeMins = rangeMins;
-            this.gridSize = gridSize;
+            this.unitDistance = unitDistance;
 
             queriedPoints = new Dictionary<bool, HashSet<LatticePoint>>()
             {
@@ -70,7 +70,7 @@ namespace Ranger
             var directionPoints = new Dictionary<DirectionEnum, IGeoLocation>();
 
             // load existing cardinal direction points from DB
-            foreach (var directionPoint in Home.CardinalDirectionPoints.Where(x => x.RangeMins == rangeMins))
+            foreach (var directionPoint in Home.CardinalDirectionPoints.Where(x => x.UnitDistance == unitDistance))
             {
                 directionPoints[directionPoint.Direction] = directionPoint;
             }
@@ -83,12 +83,12 @@ namespace Ranger
                     continue;
                 }
 
-                directionPoints[direction] = FindIntersection(direction);
+                directionPoints[direction] = ComputeOffset(direction);
 
                 var newPoint = new CardinalDirectionPoint()
                 {
                     OriginId = Home.Id,
-                    RangeMins = rangeMins,
+                    UnitDistance = unitDistance,
                     Direction = direction,
                     Latitude = directionPoints[direction].Latitude,
                     Longitude = directionPoints[direction].Longitude
@@ -101,9 +101,16 @@ namespace Ranger
             dbContext.SubmitChanges();
 
             // set deltas
-            // we're dividing by 2.0 because we only look at even points - odd points are reserved for the border
-            deltaLat = (directionPoints[DirectionEnum.North].Latitude - directionPoints[DirectionEnum.South].Latitude) / (2.0 * gridSize);
-            deltaLon = (directionPoints[DirectionEnum.East].Longitude - directionPoints[DirectionEnum.West].Longitude) / (2.0 * gridSize);
+            deltaLat = (directionPoints[DirectionEnum.North].Latitude - directionPoints[DirectionEnum.South].Latitude) / 2.0;
+            deltaLon = (directionPoints[DirectionEnum.East].Longitude - directionPoints[DirectionEnum.West].Longitude) / 2.0;
+        }
+
+        private IGeoLocation ComputeOffset(DirectionEnum direction)
+        {
+            //public static IGeoLocation ComputeOffset(IGeoLocation start, int distance, double bearing, string apiKey)
+            var apiKeyPath = Path.Combine(Default.RangerFolder, "apiKey.txt");
+            var apiKey = File.ReadAllText(apiKeyPath);
+            return GeometryApi.ComputeOffset(Home, unitDistance, direction.Heading(), apiKey);
         }
 
         /// <summary>
@@ -271,40 +278,38 @@ namespace Ranger
             // doing this in two parts because DirectionEnum is not in the DB
             var northernPoint = dbContext
                 .CardinalDirectionPoints
-                .Where(x => x.OriginId == Home.Id && x.RangeMins == rangeMins)
+                .Where(x => x.OriginId == Home.Id && x.UnitDistance == unitDistance)
                 .ToList()
                 .Single(x => x.Direction == DirectionEnum.North);
 
-            var north = (int)Math.Floor((northernPoint.Latitude - Home.Latitude) / deltaLat);
+            var low = 0;
+            var high = 2;
 
-            // north needs to be even
-            north = (north / 2) * 2;
-
-            // this point should be inside, but we're going to check that
-            var initiallyInside = true;
-
-            // bring the point inside
-            while (!Inside(GeoPointFromLatticePoint(0, north)))
+            while (Inside(GeoPointFromLatticePoint(0, high)))
             {
-                north -= 2;
-                initiallyInside = false;
+                high *= 2;
             }
 
-            // if we were intially inside, we may want to go further north
-            // otherwise, we're done
-            if (initiallyInside)
+            while (high - low > 2)
             {
-                while (Inside(GeoPointFromLatticePoint(0, north + 2)))
+                // mid must be even
+                var mid = ((high + low) / 4) * 2;
+
+                if (Inside(GeoPointFromLatticePoint(0, mid)))
                 {
-                    north += 2;
+                    low = mid;
+                }
+                else
+                {
+                    high = mid;
                 }
             }
 
-            // north: the last even point inside
-            AddNode(0, north, true);
+            // low: the last even point inside
+            AddNode(0, low, true);
 
-            // north + 2: the first even point outside
-            AddNode(0, north + 2, false);
+            // high: the first even point outside
+            AddNode(0, high, false);
         }
 
         /// <summary>
@@ -392,6 +397,7 @@ namespace Ranger
             {
                 OriginId = Home.Id,
                 RangeMins = rangeMins,
+                UnitDistance = unitDistance,
                 X = x,
                 Y = y,
                 Inside = inside
@@ -412,52 +418,11 @@ namespace Ranger
 
         private void LoadGridNodes()
         {
-            foreach (var gridNode in Home.GridNodes.Where(x => x.RangeMins == rangeMins))
+            foreach (var gridNode in Home.GridNodes.Where(x => x.RangeMins == rangeMins && x.UnitDistance == unitDistance))
             {
                 // add to the corresponding hash set
                 queriedPoints[gridNode.Inside].Add(new LatticePoint(gridNode));
             }
-        }
-
-        /// <summary>
-        /// Finds first intersection of the ray given by "startingPoint + (multX, multY) * t" (t > 0) and the border.
-        /// </summary>
-        private IGeoLocation FindIntersection(DirectionEnum direction)
-        {
-            var geoLine = new DirectionGeoLine(Home, direction);
-
-            var low = 0.0;
-            var high = Default.StartingDelta;
-
-            while (Inside(geoLine, high))
-            {
-                low = high;
-                high *= 2;
-            }
-
-            var maxAerialDistance = Default.AerialDistanceLimit;
-
-            var curr = double.NaN;
-            double aerialDistance;
-
-            // binary search until low and high points are close enough
-            do
-            {
-                curr = (low + high) / 2.0;
-
-                if (Inside(geoLine, curr))
-                {
-                    low = curr;
-                }
-                else
-                {
-                    high = curr;
-                }
-
-                aerialDistance = AerialDistance(geoLine, high, low);
-            } while (aerialDistance > maxAerialDistance);
-
-            return geoLine.PointOnLine(curr);
         }
 
         private double AerialDistance(DirectionGeoLine geoLine, double high, double low)

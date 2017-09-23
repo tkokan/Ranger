@@ -52,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JavaScriptHelper.cs" />
     <Compile Include="MapAreaInputs.cs" />
     <Compile Include="MapInputs.cs" />
     <Compile Include="Ranger.cs" />
@@ -105,13 +106,16 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ComputeAreaTemplate.html">
+    <Content Include="HtmlTemplates\ComputeAreaTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="DynamicMapTemplate.html">
+    <Content Include="HtmlTemplates\ComputeOffsetTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PolygonTemplate.html">
+    <Content Include="HtmlTemplates\DynamicMapTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="HtmlTemplates\PolygonTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

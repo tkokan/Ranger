@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Ranger
 {
@@ -10,56 +8,16 @@ namespace Ranger
         {
             var ranger = new Ranger();
 
-            var fillOpacity = 0.4;
-
-            var mapAreaInputs = new List<MapAreaInputs>()
+            var mapAreaInputs = new MapAreaInputs()
             {
-                new MapAreaInputs()
-                {
-                    OriginName = "London, UK",
-                    Color = "#872D7D",
-                    FillOpacity = fillOpacity
-                },
-
-                new MapAreaInputs()
-                {
-                    OriginName = "Paris, France",
-                    Color = "#FF8F00",
-                    FillOpacity = fillOpacity
-                },
-
-                new MapAreaInputs()
-                {
-                    OriginName = "Rome, Italy",
-                    Color = "#C22326",
-                    FillOpacity = fillOpacity
-                },
-
-                new MapAreaInputs()
-                {
-                    OriginName = "Berlin, Germany",
-                    Color = "#3C7DC4",
-                    FillOpacity = fillOpacity
-                },
-
-                new MapAreaInputs()
-                {
-                    OriginName = "Madrid, Spain",
-                    Color = "#5A8F29",
-                    FillOpacity = fillOpacity
-                }
+                OriginName = "Paris, France"
             };
+            
+            var mapInputs = new MapInputs();
 
-            var mapInputs = new MapInputs()
-            {
-                Zoom = 5,
-                Width = 800,
-                Height = 700
-            };
+            ranger.CreateDynamicMap(mapAreaInputs, mapInputs);
 
-            ranger.CreateDynamicMap(mapAreaInputs, mapInputs, "FiveCities.html");
-
-            var area = ranger.CalculateArea(mapAreaInputs.First());
+            var area = ranger.CalculateArea(mapAreaInputs);
 
             Console.WriteLine("Area = {0:0.00} sq km", area);
 

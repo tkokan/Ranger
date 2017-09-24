@@ -10,7 +10,8 @@ namespace Ranger
 
             var mapAreaInputs = new MapAreaInputs()
             {
-                OriginName = "Paris, France"
+                OriginName = "Berlin, Germany",
+                UnitDistance = 3000
             };
             
             var mapInputs = new MapInputs();

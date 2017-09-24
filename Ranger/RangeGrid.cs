@@ -40,9 +40,6 @@ namespace Ranger
                 throw new Exception("Could not load Origin from DB.");
             }
 
-            this.rangeMins = rangeMins;
-            this.unitDistance = unitDistance;
-
             queriedPoints = new Dictionary<bool, HashSet<LatticePoint>>()
             {
                 //inside points
@@ -51,6 +48,9 @@ namespace Ranger
                 // outside points
                 [false] = new HashSet<LatticePoint>()
             };
+
+            this.rangeMins = rangeMins;
+            this.unitDistance = unitDistance;
 
             // make sure an exception is thrown if we accidentaly use deltas before setting them
             deltaLat = double.NaN;
@@ -119,6 +119,7 @@ namespace Ranger
         public void Process()
         {
             Init();
+
             LoadGridNodes();
 
             // make sure we have two nodes to start with
@@ -134,6 +135,11 @@ namespace Ranger
             FindUnprocessedBorder(stack, pushed);
 
             // process the stack
+            ProcessStatck(stack, pushed);
+        }
+
+        private void ProcessStatck(Stack<LatticePoint> stack, HashSet<LatticePoint> pushed)
+        {
             while (stack.Count > 0)
             {
                 var currPoint = stack.Pop();
@@ -177,21 +183,104 @@ namespace Ranger
         /// </summary>
         public GeoLocation[] GetBorder(int smoothPct = 0)
         {
-            var borderPoints = new List<LatticePoint>();
-            var startingCenter = GetStartingBorderPoint();
-            var direction = DirectionEnum.West;
-            var currCenter = startingCenter;
+            var unprocessedNodes = new HashSet<LatticePoint>(queriedPoints[true].Where(x => HasOutsideCloseNeighbor(x)));
 
-            do
+            var borderParts = new List<List<LatticePoint>>();
+
+            while (unprocessedNodes.Count > 0)
             {
-                borderPoints.Add(currCenter);
-                MoveOnBorder(ref currCenter, ref direction);
-            } while (currCenter != startingCenter);
+                var borderPoints = new List<LatticePoint>();
+                var startingCenterAndDirection = StartBorder(unprocessedNodes);
+                var startingCenter = startingCenterAndDirection.Item1;
+                var direction = startingCenterAndDirection.Item2;
+                var currCenter = startingCenter;
+
+                do
+                {
+                    borderPoints.Add(currCenter);
+                    unprocessedNodes.Remove(currCenter.Move(direction).Move(direction.Rotate(1)));
+                    currCenter = currCenter.Move(direction, 2);
+                    direction = MoveOnBorder(currCenter, direction);
+                } while (currCenter != startingCenter);
+
+                borderParts.Add(borderPoints);
+            }
+
+            var joinedBorderPoints = JoinBorderParts(borderParts);
 
             // convert lattice points to geo locations
-            var nodes = borderPoints.Select(p => GeoPointFromLatticePoint(p)).ToArray();
+            var geoBorderPoints = joinedBorderPoints.Select(p => GeoPointFromLatticePoint(p)).ToArray();
 
-            var n = nodes.Length;
+            return Smooth(geoBorderPoints, smoothPct);
+        }
+
+        private List<LatticePoint> JoinBorderParts(List<List<LatticePoint>> borderParts)
+        {
+            // first one should be the longest
+            var sortedParts = borderParts.OrderByDescending(x => x.Count);
+            var biggestPart = sortedParts.First();
+            var otherParts = sortedParts.Skip(1).ToList();
+
+            if(otherParts.Count == 0)
+            {
+                return biggestPart;
+            }
+
+            var borderPoints = new List<LatticePoint>();
+
+            foreach(var borderPoint in biggestPart)
+            {
+                var otherPart = otherParts.SingleOrDefault(x => x.Contains(borderPoint));
+
+                if(otherPart != null)
+                {
+                    // add all points from the other part
+                    var n = otherPart.Count;
+
+                    var first = Enumerable.Range(0, n).Single(x => otherPart[x] == borderPoint);
+
+                    for(var i = 0; i < n; i++)
+                    {
+                        borderPoints.Add(otherPart[(i + first) % n]);
+                    }
+
+                    // this part is done
+                    otherParts.Remove(otherPart);
+                }
+
+                borderPoints.Add(borderPoint);
+            }
+
+            return borderPoints;
+        }
+
+        private bool HasOutsideCloseNeighbor(LatticePoint insidePoint)
+        {
+            return Enum
+                .GetValues(typeof(DirectionEnum))
+                .Cast<DirectionEnum>()
+                .Any(x => queriedPoints[false].Contains(insidePoint.Move(x, 2)));
+        }
+
+        private Tuple<LatticePoint, DirectionEnum> StartBorder(HashSet<LatticePoint> unprocessedNodes)
+        {
+            var firstBorderPoint = unprocessedNodes.OrderByDescending(p => p.Y).ThenBy(p => p.X).First();
+            var left = firstBorderPoint.Move(DirectionEnum.West, 2);
+            var center = firstBorderPoint.Move(DirectionEnum.West).Move(DirectionEnum.North);
+
+            if (queriedPoints[true].Contains(left))
+            {
+                return Tuple.Create(center, DirectionEnum.West);
+            }
+            else
+            {
+                return Tuple.Create(center, DirectionEnum.South);
+            }
+        }
+
+        private GeoLocation[] Smooth(IGeoLocation[] geoBorderPoints, int smoothPct)
+        {
+            var n = geoBorderPoints.Length;
 
             var smoothed = new GeoLocation[n];
 
@@ -203,8 +292,8 @@ namespace Ranger
 
                 smoothed[i] = new GeoLocation()
                 {
-                    Latitude = Smooth(nodes[prev].Latitude, nodes[i].Latitude, nodes[next].Latitude, smoothPct),
-                    Longitude = Smooth(nodes[prev].Longitude, nodes[i].Longitude, nodes[next].Longitude, smoothPct)
+                    Latitude = Smooth(geoBorderPoints[prev].Latitude, geoBorderPoints[i].Latitude, geoBorderPoints[next].Latitude, smoothPct),
+                    Longitude = Smooth(geoBorderPoints[prev].Longitude, geoBorderPoints[i].Longitude, geoBorderPoints[next].Longitude, smoothPct)
                 };
             }
 
@@ -217,49 +306,50 @@ namespace Ranger
             return b * (1.0 - smooth) + smooth * (a + c) / 2.0;
         }
 
-        private void MoveOnBorder(ref LatticePoint currCenter, ref DirectionEnum direction)
+        private DirectionEnum MoveOnBorder(LatticePoint currCenter, DirectionEnum direction)
         {
-            // move in the given direction
-            currCenter = currCenter.Move(direction, 2);
-
             var oneForward = currCenter.Move(direction, 1);
-            var forwardLeft = oneForward.Move(direction.Rotate(1));
 
-            // decide where to go next
+            var directionLeft = direction.Rotate(1);
+            var forwardLeft = oneForward.Move(directionLeft);
+
             if (!queriedPoints[true].Contains(forwardLeft))
             {
-                direction = direction.Rotate(1);
+                return directionLeft;
             }
-            else
-            {
-                var directionRight = direction.Rotate(-1);
-                var forwardRight = oneForward.Move(directionRight);
 
-                if (queriedPoints[true].Contains(forwardRight))
-                {
-                    direction = directionRight;
-                }
+            var directionRight = direction.Rotate(-1);
+            var forwardRight = oneForward.Move(directionRight);
+
+            if (queriedPoints[true].Contains(forwardRight))
+            {
+                return directionRight;
             }
+
+            return direction;
         }
 
+        // ToDo: Remove
         private LatticePoint GetStartingBorderPoint()
         {
-            foreach (var insidePoint in queriedPoints[true])
+            var insidePoints = queriedPoints[true];
+
+            foreach (var insidePoint in insidePoints)
             {
                 // east
-                if (!queriedPoints[true].Contains(insidePoint.Move(DirectionEnum.East, 2)))
+                if (!insidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2)))
                 {
                     continue;
                 }
 
                 // north
-                if (!queriedPoints[false].Contains(insidePoint.Move(DirectionEnum.North, 2)))
+                if (insidePoints.Contains(insidePoint.Move(DirectionEnum.North, 2)))
                 {
                     continue;
                 }
 
                 // north-east
-                if (!queriedPoints[false].Contains(insidePoint.Move(DirectionEnum.East, 2).Move(DirectionEnum.North, 2)))
+                if (insidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2).Move(DirectionEnum.North, 2)))
                 {
                     continue;
                 }
@@ -409,11 +499,6 @@ namespace Ranger
             // save
             dbContext.GridNodes.InsertOnSubmit(gridNode);
             dbContext.SubmitChanges();
-        }
-
-        private void AddNode(LatticePoint latticePoint, bool inside)
-        {
-            AddNode(latticePoint.X, latticePoint.Y, inside);
         }
 
         private void LoadGridNodes()

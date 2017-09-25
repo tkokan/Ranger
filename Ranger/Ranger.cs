@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using static Ranger.Properties.Settings;
 
 namespace Ranger
@@ -14,7 +14,7 @@ namespace Ranger
             var apiKeyPath = Path.Combine(Default.RangerFolder, "apiKey.txt");
             apiKey = File.ReadAllText(apiKeyPath);
         }
-        
+
         /// <summary>
         /// Creates a dynamic Google map.
         /// </summary>
@@ -37,7 +37,37 @@ namespace Ranger
             range.Process();
             var border = range.GetBorder(rangeOptions.SmoothPct);
 
-            return GeometryApi.ComputeArea(border, apiKey);
+            var area = GeometryApi.ComputeArea(border, apiKey);
+
+            using (var dbContext = new RangerDataContext())
+            {
+                var existingRegion = dbContext
+                    .Regions
+                    .SingleOrDefault(x => x.OriginId == range.Home.Id && x.RangeMins == rangeOptions.RangeMins && x.UnitDistance == rangeOptions.UnitDistance);
+
+                if (existingRegion == null)
+                {
+                    var newRegion = new Region()
+                    {
+                        OriginId = range.Home.Id,
+                        RangeMins = rangeOptions.RangeMins,
+                        UnitDistance = rangeOptions.UnitDistance,
+                        Area = area,
+                        BorderNodes = border.Length
+                    };
+
+                    dbContext.Regions.InsertOnSubmit(newRegion);
+                }
+                else
+                {
+                    existingRegion.Area = area;
+                    existingRegion.BorderNodes = border.Length;
+                }
+
+                dbContext.SubmitChanges();
+            }
+
+            return area;
         }
 
         public void CreateDynamicMap(IEnumerable<MapAreaInputs> mapAreaInputs, MapInputs mapInputs, string fileName)
@@ -57,7 +87,7 @@ namespace Ranger
                 // set border
                 mapAreaInput.Border = range.GetBorder(mapAreaInput.SmoothPct);
 
-                if(range.Home.Latitude > maxLat)
+                if (range.Home.Latitude > maxLat)
                 {
                     maxLat = range.Home.Latitude;
                 }

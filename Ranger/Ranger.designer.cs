@@ -30,15 +30,18 @@ namespace Ranger
 		
     #region Extensibility Method Definitions
     partial void OnCreated();
-    partial void InsertOrigin(Origin instance);
-    partial void UpdateOrigin(Origin instance);
-    partial void DeleteOrigin(Origin instance);
-    partial void InsertGridNode(GridNode instance);
-    partial void UpdateGridNode(GridNode instance);
-    partial void DeleteGridNode(GridNode instance);
+    partial void InsertRegion(Region instance);
+    partial void UpdateRegion(Region instance);
+    partial void DeleteRegion(Region instance);
     partial void InsertCardinalDirectionPoint(CardinalDirectionPoint instance);
     partial void UpdateCardinalDirectionPoint(CardinalDirectionPoint instance);
     partial void DeleteCardinalDirectionPoint(CardinalDirectionPoint instance);
+    partial void InsertGridNode(GridNode instance);
+    partial void UpdateGridNode(GridNode instance);
+    partial void DeleteGridNode(GridNode instance);
+    partial void InsertOrigin(Origin instance);
+    partial void UpdateOrigin(Origin instance);
+    partial void DeleteOrigin(Origin instance);
     #endregion
 		
 		public RangerDataContext() : 
@@ -71,11 +74,19 @@ namespace Ranger
 			OnCreated();
 		}
 		
-		public System.Data.Linq.Table<Origin> Origins
+		public System.Data.Linq.Table<Region> Regions
 		{
 			get
 			{
-				return this.GetTable<Origin>();
+				return this.GetTable<Region>();
+			}
+		}
+		
+		public System.Data.Linq.Table<CardinalDirectionPoint> CardinalDirectionPoints
+		{
+			get
+			{
+				return this.GetTable<CardinalDirectionPoint>();
 			}
 		}
 		
@@ -87,207 +98,17 @@ namespace Ranger
 			}
 		}
 		
-		public System.Data.Linq.Table<CardinalDirectionPoint> CardinalDirectionPoints
+		public System.Data.Linq.Table<Origin> Origins
 		{
 			get
 			{
-				return this.GetTable<CardinalDirectionPoint>();
+				return this.GetTable<Origin>();
 			}
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Origins")]
-	public partial class Origin : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private double _Latitude;
-		
-		private double _Longitude;
-		
-		private string _Name;
-		
-		private EntitySet<GridNode> _GridNodes;
-		
-		private EntitySet<CardinalDirectionPoint> _CardinalDirectionPoints;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnLatitudeChanging(double value);
-    partial void OnLatitudeChanged();
-    partial void OnLongitudeChanging(double value);
-    partial void OnLongitudeChanged();
-    partial void OnNameChanging(string value);
-    partial void OnNameChanged();
-    #endregion
-		
-		public Origin()
-		{
-			this._GridNodes = new EntitySet<GridNode>(new Action<GridNode>(this.attach_GridNodes), new Action<GridNode>(this.detach_GridNodes));
-			this._CardinalDirectionPoints = new EntitySet<CardinalDirectionPoint>(new Action<CardinalDirectionPoint>(this.attach_CardinalDirectionPoints), new Action<CardinalDirectionPoint>(this.detach_CardinalDirectionPoints));
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Latitude", DbType="Float NOT NULL")]
-		public double Latitude
-		{
-			get
-			{
-				return this._Latitude;
-			}
-			set
-			{
-				if ((this._Latitude != value))
-				{
-					this.OnLatitudeChanging(value);
-					this.SendPropertyChanging();
-					this._Latitude = value;
-					this.SendPropertyChanged("Latitude");
-					this.OnLatitudeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Longitude", DbType="Float NOT NULL")]
-		public double Longitude
-		{
-			get
-			{
-				return this._Longitude;
-			}
-			set
-			{
-				if ((this._Longitude != value))
-				{
-					this.OnLongitudeChanging(value);
-					this.SendPropertyChanging();
-					this._Longitude = value;
-					this.SendPropertyChanged("Longitude");
-					this.OnLongitudeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="NVarChar(MAX)")]
-		public string Name
-		{
-			get
-			{
-				return this._Name;
-			}
-			set
-			{
-				if ((this._Name != value))
-				{
-					this.OnNameChanging(value);
-					this.SendPropertyChanging();
-					this._Name = value;
-					this.SendPropertyChanged("Name");
-					this.OnNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_GridNode", Storage="_GridNodes", ThisKey="Id", OtherKey="OriginId")]
-		public EntitySet<GridNode> GridNodes
-		{
-			get
-			{
-				return this._GridNodes;
-			}
-			set
-			{
-				this._GridNodes.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_CardinalDirectionPoint", Storage="_CardinalDirectionPoints", ThisKey="Id", OtherKey="OriginId")]
-		public EntitySet<CardinalDirectionPoint> CardinalDirectionPoints
-		{
-			get
-			{
-				return this._CardinalDirectionPoints;
-			}
-			set
-			{
-				this._CardinalDirectionPoints.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_GridNodes(GridNode entity)
-		{
-			this.SendPropertyChanging();
-			entity.Origin = this;
-		}
-		
-		private void detach_GridNodes(GridNode entity)
-		{
-			this.SendPropertyChanging();
-			entity.Origin = null;
-		}
-		
-		private void attach_CardinalDirectionPoints(CardinalDirectionPoint entity)
-		{
-			this.SendPropertyChanging();
-			entity.Origin = this;
-		}
-		
-		private void detach_CardinalDirectionPoints(CardinalDirectionPoint entity)
-		{
-			this.SendPropertyChanging();
-			entity.Origin = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.GridNodes")]
-	public partial class GridNode : INotifyPropertyChanging, INotifyPropertyChanged
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Regions")]
+	public partial class Region : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -298,11 +119,9 @@ namespace Ranger
 		
 		private int _UnitDistance;
 		
-		private int _X;
+		private double _Area;
 		
-		private int _Y;
-		
-		private bool _Inside;
+		private int _BorderNodes;
 		
 		private EntityRef<Origin> _Origin;
 		
@@ -316,15 +135,13 @@ namespace Ranger
     partial void OnRangeMinsChanged();
     partial void OnUnitDistanceChanging(int value);
     partial void OnUnitDistanceChanged();
-    partial void OnXChanging(int value);
-    partial void OnXChanged();
-    partial void OnYChanging(int value);
-    partial void OnYChanged();
-    partial void OnInsideChanging(bool value);
-    partial void OnInsideChanged();
+    partial void OnAreaChanging(double value);
+    partial void OnAreaChanged();
+    partial void OnBorderNodesChanging(int value);
+    partial void OnBorderNodesChanged();
     #endregion
 		
-		public GridNode()
+		public Region()
 		{
 			this._Origin = default(EntityRef<Origin>);
 			OnCreated();
@@ -394,67 +211,47 @@ namespace Ranger
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_X", DbType="Int NOT NULL", IsPrimaryKey=true)]
-		public int X
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Area", DbType="Float NOT NULL")]
+		public double Area
 		{
 			get
 			{
-				return this._X;
+				return this._Area;
 			}
 			set
 			{
-				if ((this._X != value))
+				if ((this._Area != value))
 				{
-					this.OnXChanging(value);
+					this.OnAreaChanging(value);
 					this.SendPropertyChanging();
-					this._X = value;
-					this.SendPropertyChanged("X");
-					this.OnXChanged();
+					this._Area = value;
+					this.SendPropertyChanged("Area");
+					this.OnAreaChanged();
 				}
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Y", DbType="Int NOT NULL", IsPrimaryKey=true)]
-		public int Y
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_BorderNodes", DbType="Int NOT NULL")]
+		public int BorderNodes
 		{
 			get
 			{
-				return this._Y;
+				return this._BorderNodes;
 			}
 			set
 			{
-				if ((this._Y != value))
+				if ((this._BorderNodes != value))
 				{
-					this.OnYChanging(value);
+					this.OnBorderNodesChanging(value);
 					this.SendPropertyChanging();
-					this._Y = value;
-					this.SendPropertyChanged("Y");
-					this.OnYChanged();
+					this._BorderNodes = value;
+					this.SendPropertyChanged("BorderNodes");
+					this.OnBorderNodesChanged();
 				}
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Inside", DbType="Bit NOT NULL")]
-		public bool Inside
-		{
-			get
-			{
-				return this._Inside;
-			}
-			set
-			{
-				if ((this._Inside != value))
-				{
-					this.OnInsideChanging(value);
-					this.SendPropertyChanging();
-					this._Inside = value;
-					this.SendPropertyChanged("Inside");
-					this.OnInsideChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_GridNode", Storage="_Origin", ThisKey="OriginId", OtherKey="Id", IsForeignKey=true)]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_Region", Storage="_Origin", ThisKey="OriginId", OtherKey="Id", IsForeignKey=true)]
 		public Origin Origin
 		{
 			get
@@ -471,12 +268,12 @@ namespace Ranger
 					if ((previousValue != null))
 					{
 						this._Origin.Entity = null;
-						previousValue.GridNodes.Remove(this);
+						previousValue.Regions.Remove(this);
 					}
 					this._Origin.Entity = value;
 					if ((value != null))
 					{
-						value.GridNodes.Add(this);
+						value.Regions.Add(this);
 						this._OriginId = value.Id;
 					}
 					else
@@ -705,6 +502,447 @@ namespace Ranger
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.GridNodes")]
+	public partial class GridNode : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _OriginId;
+		
+		private int _RangeMins;
+		
+		private int _UnitDistance;
+		
+		private int _X;
+		
+		private int _Y;
+		
+		private bool _Inside;
+		
+		private EntityRef<Origin> _Origin;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnOriginIdChanging(int value);
+    partial void OnOriginIdChanged();
+    partial void OnRangeMinsChanging(int value);
+    partial void OnRangeMinsChanged();
+    partial void OnUnitDistanceChanging(int value);
+    partial void OnUnitDistanceChanged();
+    partial void OnXChanging(int value);
+    partial void OnXChanged();
+    partial void OnYChanging(int value);
+    partial void OnYChanged();
+    partial void OnInsideChanging(bool value);
+    partial void OnInsideChanged();
+    #endregion
+		
+		public GridNode()
+		{
+			this._Origin = default(EntityRef<Origin>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_OriginId", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int OriginId
+		{
+			get
+			{
+				return this._OriginId;
+			}
+			set
+			{
+				if ((this._OriginId != value))
+				{
+					if (this._Origin.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnOriginIdChanging(value);
+					this.SendPropertyChanging();
+					this._OriginId = value;
+					this.SendPropertyChanged("OriginId");
+					this.OnOriginIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RangeMins", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int RangeMins
+		{
+			get
+			{
+				return this._RangeMins;
+			}
+			set
+			{
+				if ((this._RangeMins != value))
+				{
+					this.OnRangeMinsChanging(value);
+					this.SendPropertyChanging();
+					this._RangeMins = value;
+					this.SendPropertyChanged("RangeMins");
+					this.OnRangeMinsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UnitDistance", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int UnitDistance
+		{
+			get
+			{
+				return this._UnitDistance;
+			}
+			set
+			{
+				if ((this._UnitDistance != value))
+				{
+					this.OnUnitDistanceChanging(value);
+					this.SendPropertyChanging();
+					this._UnitDistance = value;
+					this.SendPropertyChanged("UnitDistance");
+					this.OnUnitDistanceChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_X", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int X
+		{
+			get
+			{
+				return this._X;
+			}
+			set
+			{
+				if ((this._X != value))
+				{
+					this.OnXChanging(value);
+					this.SendPropertyChanging();
+					this._X = value;
+					this.SendPropertyChanged("X");
+					this.OnXChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Y", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int Y
+		{
+			get
+			{
+				return this._Y;
+			}
+			set
+			{
+				if ((this._Y != value))
+				{
+					this.OnYChanging(value);
+					this.SendPropertyChanging();
+					this._Y = value;
+					this.SendPropertyChanged("Y");
+					this.OnYChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Inside", DbType="Bit NOT NULL")]
+		public bool Inside
+		{
+			get
+			{
+				return this._Inside;
+			}
+			set
+			{
+				if ((this._Inside != value))
+				{
+					this.OnInsideChanging(value);
+					this.SendPropertyChanging();
+					this._Inside = value;
+					this.SendPropertyChanged("Inside");
+					this.OnInsideChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_GridNode", Storage="_Origin", ThisKey="OriginId", OtherKey="Id", IsForeignKey=true)]
+		public Origin Origin
+		{
+			get
+			{
+				return this._Origin.Entity;
+			}
+			set
+			{
+				Origin previousValue = this._Origin.Entity;
+				if (((previousValue != value) 
+							|| (this._Origin.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Origin.Entity = null;
+						previousValue.GridNodes.Remove(this);
+					}
+					this._Origin.Entity = value;
+					if ((value != null))
+					{
+						value.GridNodes.Add(this);
+						this._OriginId = value.Id;
+					}
+					else
+					{
+						this._OriginId = default(int);
+					}
+					this.SendPropertyChanged("Origin");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Origins")]
+	public partial class Origin : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private double _Latitude;
+		
+		private double _Longitude;
+		
+		private string _Name;
+		
+		private EntitySet<Region> _Regions;
+		
+		private EntitySet<CardinalDirectionPoint> _CardinalDirectionPoints;
+		
+		private EntitySet<GridNode> _GridNodes;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnLatitudeChanging(double value);
+    partial void OnLatitudeChanged();
+    partial void OnLongitudeChanging(double value);
+    partial void OnLongitudeChanged();
+    partial void OnNameChanging(string value);
+    partial void OnNameChanged();
+    #endregion
+		
+		public Origin()
+		{
+			this._Regions = new EntitySet<Region>(new Action<Region>(this.attach_Regions), new Action<Region>(this.detach_Regions));
+			this._CardinalDirectionPoints = new EntitySet<CardinalDirectionPoint>(new Action<CardinalDirectionPoint>(this.attach_CardinalDirectionPoints), new Action<CardinalDirectionPoint>(this.detach_CardinalDirectionPoints));
+			this._GridNodes = new EntitySet<GridNode>(new Action<GridNode>(this.attach_GridNodes), new Action<GridNode>(this.detach_GridNodes));
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Latitude", DbType="Float NOT NULL")]
+		public double Latitude
+		{
+			get
+			{
+				return this._Latitude;
+			}
+			set
+			{
+				if ((this._Latitude != value))
+				{
+					this.OnLatitudeChanging(value);
+					this.SendPropertyChanging();
+					this._Latitude = value;
+					this.SendPropertyChanged("Latitude");
+					this.OnLatitudeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Longitude", DbType="Float NOT NULL")]
+		public double Longitude
+		{
+			get
+			{
+				return this._Longitude;
+			}
+			set
+			{
+				if ((this._Longitude != value))
+				{
+					this.OnLongitudeChanging(value);
+					this.SendPropertyChanging();
+					this._Longitude = value;
+					this.SendPropertyChanged("Longitude");
+					this.OnLongitudeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="NVarChar(MAX)")]
+		public string Name
+		{
+			get
+			{
+				return this._Name;
+			}
+			set
+			{
+				if ((this._Name != value))
+				{
+					this.OnNameChanging(value);
+					this.SendPropertyChanging();
+					this._Name = value;
+					this.SendPropertyChanged("Name");
+					this.OnNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_Region", Storage="_Regions", ThisKey="Id", OtherKey="OriginId")]
+		public EntitySet<Region> Regions
+		{
+			get
+			{
+				return this._Regions;
+			}
+			set
+			{
+				this._Regions.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_CardinalDirectionPoint", Storage="_CardinalDirectionPoints", ThisKey="Id", OtherKey="OriginId")]
+		public EntitySet<CardinalDirectionPoint> CardinalDirectionPoints
+		{
+			get
+			{
+				return this._CardinalDirectionPoints;
+			}
+			set
+			{
+				this._CardinalDirectionPoints.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Origin_GridNode", Storage="_GridNodes", ThisKey="Id", OtherKey="OriginId")]
+		public EntitySet<GridNode> GridNodes
+		{
+			get
+			{
+				return this._GridNodes;
+			}
+			set
+			{
+				this._GridNodes.Assign(value);
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_Regions(Region entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = this;
+		}
+		
+		private void detach_Regions(Region entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = null;
+		}
+		
+		private void attach_CardinalDirectionPoints(CardinalDirectionPoint entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = this;
+		}
+		
+		private void detach_CardinalDirectionPoints(CardinalDirectionPoint entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = null;
+		}
+		
+		private void attach_GridNodes(GridNode entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = this;
+		}
+		
+		private void detach_GridNodes(GridNode entity)
+		{
+			this.SendPropertyChanging();
+			entity.Origin = null;
 		}
 	}
 }

@@ -329,37 +329,6 @@ namespace Ranger
             return direction;
         }
 
-        // ToDo: Remove
-        private LatticePoint GetStartingBorderPoint()
-        {
-            var insidePoints = queriedPoints[true];
-
-            foreach (var insidePoint in insidePoints)
-            {
-                // east
-                if (!insidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2)))
-                {
-                    continue;
-                }
-
-                // north
-                if (insidePoints.Contains(insidePoint.Move(DirectionEnum.North, 2)))
-                {
-                    continue;
-                }
-
-                // north-east
-                if (insidePoints.Contains(insidePoint.Move(DirectionEnum.East, 2).Move(DirectionEnum.North, 2)))
-                {
-                    continue;
-                }
-
-                return insidePoint.Move(DirectionEnum.East, 1).Move(DirectionEnum.North, 1);
-            }
-
-            throw new NotImplementedException("No suitable starting border point found.");
-        }
-
         /// <summary>
         /// Finds two neighboring points - one inside, one outside - and stores them to DB.
         /// </summary>
